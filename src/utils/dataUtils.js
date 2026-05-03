@@ -1,15 +1,36 @@
-import { employees, activities } from '../data/mockData';
+import { employees, activities, CATEGORY_POINTS } from '../data/mockData';
+import { DEFAULT_FILTERS } from './constants';
 
-/**
- * Filters employees based on year, quarter, category, and search term
- * All active filters must match (AND logic)
- */
-export const filterEmployees = (year, quarter, category, searchTerm) => {
+const normalizeFilters = (filters) => ({ ...DEFAULT_FILTERS, ...filters });
+
+const matchesActivityFilters = (activity, filters) => {
+  const yearMatch = filters.year === 'All Years' || activity.year === filters.year;
+  const quarterMatch = filters.quarter === 'All Quarters' || activity.quarter === filters.quarter;
+  const categoryMatch =
+    filters.category === 'All Categories' || activity.category === filters.category;
+  return yearMatch && quarterMatch && categoryMatch;
+};
+
+export const getPointsForCategory = (categoryLabel) => CATEGORY_POINTS[categoryLabel] || 0;
+
+export const getMemberActivities = (memberId, filters) => {
+  const normalized = normalizeFilters(filters);
+  return activities
+    .filter((act) => act.memberId === memberId)
+    .filter((activity) => matchesActivityFilters(activity, normalized));
+};
+
+export const calculateMemberScore = (memberId, filters) =>
+  getMemberActivities(memberId, filters).reduce(
+    (total, activity) => total + getPointsForCategory(activity.category),
+    0,
+  );
+
+const filterEmployees = (filters) => {
   let filtered = [...employees];
 
-  // Filter by search term (case-insensitive)
-  if (searchTerm && searchTerm.trim()) {
-    const searchLower = searchTerm.toLowerCase();
+  if (filters.searchTerm?.trim()) {
+    const searchLower = filters.searchTerm.toLowerCase();
     filtered = filtered.filter(
       (emp) =>
         emp.name.toLowerCase().includes(searchLower) ||
@@ -17,50 +38,28 @@ export const filterEmployees = (year, quarter, category, searchTerm) => {
     );
   }
 
-  // Filter by year, quarter, category based on activities
-  if (year !== 'All Years' || quarter !== 'All Quarters' || category !== 'All Categories') {
-    filtered = filtered.filter((emp) => {
-      const employeeActivities = activities.filter((act) => act.memberId === emp.id);
-
-      return employeeActivities.some((act) => {
-        const yearMatch = year === 'All Years' || act.year === year;
-        const quarterMatch = quarter === 'All Quarters' || act.quarter === quarter;
-        const categoryMatch = category === 'All Categories' || act.category === category;
-
-        return yearMatch && quarterMatch && categoryMatch;
-      });
-    });
+  if (
+    filters.year !== 'All Years' ||
+    filters.quarter !== 'All Quarters' ||
+    filters.category !== 'All Categories'
+  ) {
+    filtered = filtered.filter((emp) => getMemberActivities(emp.id, filters).length > 0);
   }
 
   return filtered;
 };
 
-/**
- * Sorts employees by score in descending order
- */
-export const sortByScore = (employeeList) => {
-  return [...employeeList].sort((a, b) => b.score - a.score);
+const sortByScore = (employeeList, filters) => {
+  const scoreCache = new Map(
+    employeeList.map((emp) => [emp.id, calculateMemberScore(emp.id, filters)]),
+  );
+  return [...employeeList].sort((a, b) => scoreCache.get(b.id) - scoreCache.get(a.id));
 };
 
-/**
- * Gets the top 3 employees
- */
-export const getTopThree = (employeeList) => {
-  const sorted = sortByScore(employeeList);
-  return sorted.slice(0, 3);
-};
+export const getTopThree = (employeeList, filters) =>
+  sortByScore(employeeList, filters).slice(0, 3);
 
-/**
- * Gets activities for a specific member
- */
-export const getMemberActivities = (memberId) => {
-  return activities.filter((act) => act.memberId === memberId);
-};
-
-/**
- * Applies all filters, sorts by score, and returns the result
- */
-export const getFilteredAndSortedEmployees = (year, quarter, category, searchTerm) => {
-  const filtered = filterEmployees(year, quarter, category, searchTerm);
-  return sortByScore(filtered);
+export const getFilteredAndSortedEmployees = (filters) => {
+  const normalized = normalizeFilters(filters);
+  return sortByScore(filterEmployees(normalized), normalized);
 };

@@ -1,36 +1,26 @@
 import { useState } from 'react';
-import './App.css';
 import Header from './components/Header';
 import FilterBar from './components/FilterBar';
 import TopLeaders from './components/TopLeaders';
 import MembersList from './components/MembersList';
 import { getFilteredAndSortedEmployees, getTopThree } from './utils/dataUtils';
+import { useFilters } from './context/FiltersContext';
 
 function App() {
-  const [filters, setFilters] = useState({
-    year: 'All Years',
-    quarter: 'All Quarters',
-    category: 'All Categories',
-    searchTerm: '',
-  });
+  const { filters } = useFilters();
   const [expandedMemberId, setExpandedMemberId] = useState(null);
 
   // Get filtered and sorted employees
-  const filteredEmployees = getFilteredAndSortedEmployees(
-    filters.year,
-    filters.quarter,
-    filters.category,
-    filters.searchTerm,
-  );
+  const filteredEmployees = getFilteredAndSortedEmployees(filters);
 
   // Get top 3 from filtered employees
-  const topThree = getTopThree(filteredEmployees);
+  const topThree = getTopThree(filteredEmployees, filters);
 
   return (
     <div className='min-h-screen bg-gray-100 py-8 px-4'>
       <div className='max-w-6xl mx-auto'>
         <Header />
-        <FilterBar onFiltersChange={setFilters} filters={filters} />
+        <FilterBar />
 
         {filteredEmployees.length > 0 ? (
           <>

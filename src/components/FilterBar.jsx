@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { YEARS, QUARTERS, CATEGORIES } from '../data/mockData';
+import { useFilters } from '../context/FiltersContext';
 
 function Dropdown({ label, value, options, onSelect, widthClass, isOpen, onToggle, onClose }) {
   const containerRef = useRef(null);
 
   useEffect(() => {
+    if (!isOpen) return;
+
     const handleClickOutside = (event) => {
       if (containerRef.current && !containerRef.current.contains(event.target)) {
         onClose();
@@ -15,7 +18,7 @@ function Dropdown({ label, value, options, onSelect, widthClass, isOpen, onToggl
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [onClose]);
+  }, [isOpen, onClose]);
 
   return (
     <div ref={containerRef} className={`relative ${widthClass}`}>
@@ -63,15 +66,15 @@ function Dropdown({ label, value, options, onSelect, widthClass, isOpen, onToggl
   );
 }
 
-export default function FilterBar({ onFiltersChange, filters }) {
+export default function FilterBar() {
+  const { filters, setFilters } = useFilters();
   const [openDropdown, setOpenDropdown] = useState(null);
 
   const handleChange = (filterName, value) => {
-    onFiltersChange({
-      ...filters,
-      [filterName]: value,
-    });
+    setFilters({ ...filters, [filterName]: value });
   };
+
+  const toggleDropdown = (name) => setOpenDropdown(openDropdown === name ? null : name);
 
   const yearOptions = ['All Years', ...YEARS];
   const quarterOptions = ['All Quarters', ...QUARTERS];
@@ -88,9 +91,9 @@ export default function FilterBar({ onFiltersChange, filters }) {
           value={filters.year}
           options={yearOptions}
           onSelect={(value) => handleChange('year', value)}
-          widthClass='w-[7.5rem]'
+          widthClass='w-40'
           isOpen={openDropdown === 'year'}
-          onToggle={() => setOpenDropdown(openDropdown === 'year' ? null : 'year')}
+          onToggle={() => toggleDropdown('year')}
           onClose={() => setOpenDropdown(null)}
         />
 
@@ -99,9 +102,9 @@ export default function FilterBar({ onFiltersChange, filters }) {
           value={filters.quarter}
           options={quarterOptions}
           onSelect={(value) => handleChange('quarter', value)}
-          widthClass='w-32'
+          widthClass='w-40'
           isOpen={openDropdown === 'quarter'}
-          onToggle={() => setOpenDropdown(openDropdown === 'quarter' ? null : 'quarter')}
+          onToggle={() => toggleDropdown('quarter')}
           onClose={() => setOpenDropdown(null)}
         />
 
@@ -110,9 +113,9 @@ export default function FilterBar({ onFiltersChange, filters }) {
           value={filters.category}
           options={categoryOptions}
           onSelect={(value) => handleChange('category', value)}
-          widthClass='w-40'
+          widthClass='w-48'
           isOpen={openDropdown === 'category'}
-          onToggle={() => setOpenDropdown(openDropdown === 'category' ? null : 'category')}
+          onToggle={() => toggleDropdown('category')}
           onClose={() => setOpenDropdown(null)}
         />
 
