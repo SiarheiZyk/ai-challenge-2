@@ -3,8 +3,10 @@ import {
   calculateMemberScore,
   getPointsForCategory,
 } from '../utils/dataUtils';
+import { useFilters } from '../context/FiltersContext';
 
 export default function MembersList({ members, expandedMemberId, onExpandMember }) {
+  const { filters } = useFilters();
   return (
     <div className='space-y-4'>
       {members.map((member, index) => (
@@ -37,7 +39,7 @@ export default function MembersList({ members, expandedMemberId, onExpandMember 
             </div>
 
             <div className='hidden items-end gap-5 md:flex'>
-              <ActivitySummary memberId={member.id} />
+              <ActivitySummary memberId={member.id} filters={filters} />
 
               <div className='h-10 w-px bg-[#e1e6ee]' />
 
@@ -48,7 +50,7 @@ export default function MembersList({ members, expandedMemberId, onExpandMember 
                 <div className='mt-0.5 flex items-baseline justify-end gap-2 text-[#2ca7e0]'>
                   <span className='text-[28px] leading-none'>★</span>
                   <span className='text-[24px] font-[700] leading-none'>
-                    {calculateMemberScore(member.id)}
+                    {calculateMemberScore(member.id, filters)}
                   </span>
                 </div>
               </div>
@@ -71,15 +73,15 @@ export default function MembersList({ members, expandedMemberId, onExpandMember 
             </div>
           </button>
 
-          {expandedMemberId === member.id && <MemberDetail memberId={member.id} />}
+          {expandedMemberId === member.id && <MemberDetail memberId={member.id} filters={filters} />}
         </div>
       ))}
     </div>
   );
 }
 
-function ActivitySummary({ memberId }) {
-  const memberActivities = getMemberActivities(memberId);
+function ActivitySummary({ memberId, filters }) {
+  const memberActivities = getMemberActivities(memberId, filters);
   const allCategories = getTopCategoryCounts(memberActivities);
 
   return (
@@ -121,11 +123,10 @@ function getTopCategoryCounts(activities) {
     .sort((a, b) => b.count - a.count);
 }
 
-function getCategoryIcon(category) {
-  const normalized = category.toLowerCase();
-
-  if (normalized.includes('code review')) {
-    return (
+const CATEGORY_ICON_MAP = [
+  {
+    match: 'code review',
+    icon: (
       <svg className='h-6 w-6' viewBox='0 0 24 24' fill='none' stroke='currentColor'>
         <path
           strokeLinecap='round'
@@ -134,11 +135,11 @@ function getCategoryIcon(category) {
           d='M9 4L4 12l5 8M15 4l5 8-5 8'
         />
       </svg>
-    );
-  }
-
-  if (normalized.includes('documentation')) {
-    return (
+    ),
+  },
+  {
+    match: 'documentation',
+    icon: (
       <svg className='h-6 w-6' viewBox='0 0 24 24' fill='none' stroke='currentColor'>
         <path
           strokeLinecap='round'
@@ -149,11 +150,11 @@ function getCategoryIcon(category) {
         <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='1.8' d='M14 3v5h5' />
         <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='1.8' d='M9 13h6M9 17h4' />
       </svg>
-    );
-  }
-
-  if (normalized.includes('bug')) {
-    return (
+    ),
+  },
+  {
+    match: 'bug',
+    icon: (
       <svg className='h-6 w-6' viewBox='0 0 24 24' fill='none' stroke='currentColor'>
         <path
           strokeLinecap='round'
@@ -174,20 +175,25 @@ function getCategoryIcon(category) {
           d='M4 13h3m10 0h3M6 8l2 2m10-2l-2 2M6 18l2-2m10 2l-2-2'
         />
       </svg>
-    );
-  }
-
-  if (normalized.includes('feature')) {
-    return (
+    ),
+  },
+  {
+    match: 'feature',
+    icon: (
       <svg className='h-6 w-6' viewBox='0 0 24 24' fill='none' stroke='currentColor'>
-        <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='1.8' d='M12 3v18M3 12h18' />
+        <path
+          strokeLinecap='round'
+          strokeLinejoin='round'
+          strokeWidth='1.8'
+          d='M12 3v18M3 12h18'
+        />
         <rect x='5' y='5' width='14' height='14' rx='2' strokeWidth='1.8' />
       </svg>
-    );
-  }
-
-  if (normalized.includes('training')) {
-    return (
+    ),
+  },
+  {
+    match: 'training',
+    icon: (
       <svg className='h-6 w-6' viewBox='0 0 24 24' fill='none' stroke='currentColor'>
         <path
           strokeLinecap='round'
@@ -196,11 +202,11 @@ function getCategoryIcon(category) {
           d='M12 4l9 5-9 5-9-5 9-5zm0 10v6m-6-8v5c0 1.2 2.7 3 6 3s6-1.8 6-3v-5'
         />
       </svg>
-    );
-  }
-
-  if (normalized.includes('mentoring')) {
-    return (
+    ),
+  },
+  {
+    match: 'mentoring',
+    icon: (
       <svg className='h-6 w-6' viewBox='0 0 24 24' fill='none' stroke='currentColor'>
         <path
           strokeLinecap='round'
@@ -209,11 +215,11 @@ function getCategoryIcon(category) {
           d='M12 8c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm0 2c-2.21 0-4 1.79-4 4v3h8v-3c0-2.21-1.79-4-4-4zm5 8H7a1 1 0 01-1-1v-2h12v2a1 1 0 01-1 1z'
         />
       </svg>
-    );
-  }
-
-  if (normalized.includes('public')) {
-    return (
+    ),
+  },
+  {
+    match: 'public',
+    icon: (
       <svg className='h-6 w-6' viewBox='0 0 24 24' fill='none' stroke='currentColor'>
         <path
           strokeLinecap='round'
@@ -228,11 +234,11 @@ function getCategoryIcon(category) {
           d='M18 9a3 3 0 010 6'
         />
       </svg>
-    );
-  }
-
-  if (normalized.includes('leadership')) {
-    return (
+    ),
+  },
+  {
+    match: 'leadership',
+    icon: (
       <svg className='h-6 w-6' viewBox='0 0 24 24' fill='none' stroke='currentColor'>
         <path
           strokeLinecap='round'
@@ -241,19 +247,24 @@ function getCategoryIcon(category) {
           d='M13 10V3L4 14h7v7l9-11h-7z'
         />
       </svg>
-    );
-  }
+    ),
+  },
+];
 
-  return (
-    <svg className='h-6 w-6' viewBox='0 0 24 24' fill='none' stroke='currentColor'>
-      <rect x='3' y='4' width='18' height='12' rx='2' strokeWidth='1.8' />
-      <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='1.8' d='M8 20h8M12 16v4' />
-    </svg>
-  );
+const fallbackIcon = (
+  <svg className='h-6 w-6' viewBox='0 0 24 24' fill='none' stroke='currentColor'>
+    <rect x='3' y='4' width='18' height='12' rx='2' strokeWidth='1.8' />
+    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='1.8' d='M8 20h8M12 16v4' />
+  </svg>
+);
+
+function getCategoryIcon(category) {
+  const normalized = category.toLowerCase();
+  return CATEGORY_ICON_MAP.find((entry) => normalized.includes(entry.match))?.icon ?? fallbackIcon;
 }
 
-function MemberDetail({ memberId }) {
-  const memberActivities = getMemberActivities(memberId);
+function MemberDetail({ memberId, filters }) {
+  const memberActivities = getMemberActivities(memberId, filters);
 
   return (
     <div className='border-t border-[#dfe5ee] bg-[#f8fbff] px-6 py-5'>

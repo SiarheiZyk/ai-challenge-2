@@ -1,3 +1,20 @@
+const sharedRunnerUpConfig = {
+  profileOffset: 'md:translate-y-4',
+  avatarSize: 'h-[88px] w-[88px]',
+  avatarRing: 'border-[3px] border-white shadow-[0_4px_10px_rgba(72,93,122,0.16)]',
+  badgeSize: 'h-8 w-8 text-[18px]',
+  scorePill: 'bg-white text-[#41a6e6] border border-[#dbe3f1]',
+  scoreValueClass: 'text-[18px]',
+  scoreStarClass: 'text-[16px]',
+  block: 'h-40 md:h-44 bg-gradient-to-b from-[#d7deea] to-[#ced7e5] border border-[#c1cbda]',
+  blockShadow: 'shadow-[0_2px_0_rgba(166,177,196,0.45)_inset,0_1px_3px_rgba(93,107,131,0.16)]',
+  numberColor: 'text-[#c2cbdb]',
+  numberSize: 'text-[96px]',
+  nameClass: 'mb-1 text-[20px] leading-[23px] font-semibold text-[#0F172A]',
+  titleClass: 'mb-2 text-[14px] leading-[17px] text-[#64748B]',
+  blockGap: 'mt-8',
+};
+
 const podiumConfig = {
   1: {
     profileOffset: 'md:translate-y-0',
@@ -17,45 +34,21 @@ const podiumConfig = {
     blockGap: 'mt-2',
   },
   2: {
-    profileOffset: 'md:translate-y-4',
-    avatarSize: 'h-[88px] w-[88px]',
-    avatarRing: 'border-[3px] border-white shadow-[0_4px_10px_rgba(72,93,122,0.16)]',
-    badgeSize: 'h-8 w-8 text-[18px]',
+    ...sharedRunnerUpConfig,
     badgeBg: 'bg-[#94a3b8] text-white border-2 border-white shadow-[0_2px_6px_rgba(0,0,0,0.18)]',
-    scorePill: 'bg-white text-[#41a6e6] border border-[#dbe3f1]',
-    scoreValueClass: 'text-[18px]',
-    scoreStarClass: 'text-[16px]',
-    block: 'h-40 md:h-44 bg-gradient-to-b from-[#d7deea] to-[#ced7e5] border border-[#c1cbda]',
-    blockShadow: 'shadow-[0_2px_0_rgba(166,177,196,0.45)_inset,0_1px_3px_rgba(93,107,131,0.16)]',
-    numberColor: 'text-[#c2cbdb]',
-    numberSize: 'text-[96px]',
-    nameClass: 'mb-1 text-[20px] leading-[23px] font-semibold text-[#0F172A]',
-    titleClass: 'mb-2 text-[14px] leading-[17px] text-[#64748B]',
-    blockGap: 'mt-8',
   },
   3: {
-    profileOffset: 'md:translate-y-4',
-    avatarSize: 'h-[88px] w-[88px]',
-    avatarRing: 'border-[3px] border-white shadow-[0_4px_10px_rgba(72,93,122,0.16)]',
-    badgeSize: 'h-8 w-8 text-[18px]',
+    ...sharedRunnerUpConfig,
     badgeBg: 'bg-[#a34d14] text-white border-2 border-white shadow-[0_2px_6px_rgba(0,0,0,0.18)]',
-    scorePill: 'bg-white text-[#41a6e6] border border-[#dbe3f1]',
-    scoreValueClass: 'text-[18px]',
-    scoreStarClass: 'text-[16px]',
-    block: 'h-40 md:h-44 bg-gradient-to-b from-[#d7deea] to-[#ced7e5] border border-[#c1cbda]',
-    blockShadow: 'shadow-[0_2px_0_rgba(166,177,196,0.45)_inset,0_1px_3px_rgba(93,107,131,0.16)]',
-    numberColor: 'text-[#c2cbdb]',
-    numberSize: 'text-[96px]',
-    nameClass: 'mb-1 text-[20px] leading-[23px] font-semibold text-[#0F172A]',
-    titleClass: 'mb-2 text-[14px] leading-[17px] text-[#64748B]',
-    blockGap: 'mt-8',
   },
 };
 
 import { calculateMemberScore } from '../utils/dataUtils';
+import { useFilters } from '../context/FiltersContext';
 
 function WinnerCard({ employee, rank }) {
   const config = podiumConfig[rank];
+  const { filters } = useFilters();
 
   return (
     <div className='flex flex-col items-center'>
@@ -82,7 +75,7 @@ function WinnerCard({ employee, rank }) {
           className={`mx-auto mt-3 inline-flex items-center gap-2 rounded-full px-5 py-2 font-bold leading-none ${config.scorePill}`}
         >
           <span className={config.scoreStarClass}>★</span>
-          <span className={config.scoreValueClass}>{calculateMemberScore(employee.id)}</span>
+          <span className={config.scoreValueClass}>{calculateMemberScore(employee.id, filters)}</span>
         </div>
       </div>
 
