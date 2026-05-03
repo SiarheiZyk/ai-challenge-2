@@ -1,4 +1,8 @@
-import { getMemberActivities } from '../utils/dataUtils';
+import {
+  getMemberActivities,
+  calculateMemberScore,
+  getPointsForCategory,
+} from '../utils/dataUtils';
 
 export default function MembersList({ members, expandedMemberId, onExpandMember }) {
   return (
@@ -20,7 +24,7 @@ export default function MembersList({ members, expandedMemberId, onExpandMember 
             </div>
 
             <img
-              src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${member.name}`}
+              src={member.avatar}
               alt={member.name}
               className='h-14 w-14 rounded-full object-cover'
             />
@@ -43,7 +47,9 @@ export default function MembersList({ members, expandedMemberId, onExpandMember 
                 </div>
                 <div className='mt-0.5 flex items-baseline justify-end gap-2 text-[#2ca7e0]'>
                   <span className='text-[28px] leading-none'>★</span>
-                  <span className='text-[24px] font-[700] leading-none'>{member.score}</span>
+                  <span className='text-[24px] font-[700] leading-none'>
+                    {calculateMemberScore(member.id)}
+                  </span>
                 </div>
               </div>
 
@@ -74,11 +80,11 @@ export default function MembersList({ members, expandedMemberId, onExpandMember 
 
 function ActivitySummary({ memberId }) {
   const memberActivities = getMemberActivities(memberId);
-  const topCategories = getTopCategoryCounts(memberActivities).slice(0, 2);
+  const allCategories = getTopCategoryCounts(memberActivities);
 
   return (
     <div className='flex items-end gap-4'>
-      {topCategories.map((item) => (
+      {allCategories.map((item) => (
         <ActivityMetric key={item.category} category={item.category} count={item.count} />
       ))}
     </div>
@@ -180,7 +186,7 @@ function getCategoryIcon(category) {
     );
   }
 
-  if (normalized.includes('training') || normalized.includes('mentoring')) {
+  if (normalized.includes('training')) {
     return (
       <svg className='h-6 w-6' viewBox='0 0 24 24' fill='none' stroke='currentColor'>
         <path
@@ -193,7 +199,20 @@ function getCategoryIcon(category) {
     );
   }
 
-  if (normalized.includes('public') || normalized.includes('leadership')) {
+  if (normalized.includes('mentoring')) {
+    return (
+      <svg className='h-6 w-6' viewBox='0 0 24 24' fill='none' stroke='currentColor'>
+        <path
+          strokeLinecap='round'
+          strokeLinejoin='round'
+          strokeWidth='1.8'
+          d='M12 8c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm0 2c-2.21 0-4 1.79-4 4v3h8v-3c0-2.21-1.79-4-4-4zm5 8H7a1 1 0 01-1-1v-2h12v2a1 1 0 01-1 1z'
+        />
+      </svg>
+    );
+  }
+
+  if (normalized.includes('public')) {
     return (
       <svg className='h-6 w-6' viewBox='0 0 24 24' fill='none' stroke='currentColor'>
         <path
@@ -207,6 +226,19 @@ function getCategoryIcon(category) {
           strokeLinejoin='round'
           strokeWidth='1.8'
           d='M18 9a3 3 0 010 6'
+        />
+      </svg>
+    );
+  }
+
+  if (normalized.includes('leadership')) {
+    return (
+      <svg className='h-6 w-6' viewBox='0 0 24 24' fill='none' stroke='currentColor'>
+        <path
+          strokeLinecap='round'
+          strokeLinejoin='round'
+          strokeWidth='1.8'
+          d='M13 10V3L4 14h7v7l9-11h-7z'
         />
       </svg>
     );
@@ -267,7 +299,7 @@ function MemberDetail({ memberId }) {
                   {activity.date}
                 </div>
                 <div className='w-20 text-right text-[14px] font-[600] text-[#2ca7e0]'>
-                  +{activity.points}
+                  +{getPointsForCategory(activity.category)}
                 </div>
               </div>
             ))}

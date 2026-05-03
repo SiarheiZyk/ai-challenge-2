@@ -52,6 +52,8 @@ const podiumConfig = {
   },
 };
 
+import { calculateMemberScore } from '../utils/dataUtils';
+
 function WinnerCard({ employee, rank }) {
   const config = podiumConfig[rank];
 
@@ -62,7 +64,7 @@ function WinnerCard({ employee, rank }) {
           className={`relative mx-auto mb-3 rounded-full ${config.avatarSize} ${config.avatarRing}`}
         >
           <img
-            src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${employee.name}`}
+            src={employee.avatar}
             alt={employee.name}
             className='h-full w-full rounded-full object-cover'
           />
@@ -80,7 +82,7 @@ function WinnerCard({ employee, rank }) {
           className={`mx-auto mt-3 inline-flex items-center gap-2 rounded-full px-5 py-2 font-bold leading-none ${config.scorePill}`}
         >
           <span className={config.scoreStarClass}>★</span>
-          <span className={config.scoreValueClass}>{employee.score}</span>
+          <span className={config.scoreValueClass}>{calculateMemberScore(employee.id)}</span>
         </div>
       </div>
 

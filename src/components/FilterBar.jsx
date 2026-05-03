@@ -88,7 +88,7 @@ export default function FilterBar({ onFiltersChange, filters }) {
           value={filters.year}
           options={yearOptions}
           onSelect={(value) => handleChange('year', value)}
-          widthClass='w-[7.5rem]'
+          widthClass='w-40'
           isOpen={openDropdown === 'year'}
           onToggle={() => setOpenDropdown(openDropdown === 'year' ? null : 'year')}
           onClose={() => setOpenDropdown(null)}
@@ -99,7 +99,7 @@ export default function FilterBar({ onFiltersChange, filters }) {
           value={filters.quarter}
           options={quarterOptions}
           onSelect={(value) => handleChange('quarter', value)}
-          widthClass='w-32'
+          widthClass='w-40'
           isOpen={openDropdown === 'quarter'}
           onToggle={() => setOpenDropdown(openDropdown === 'quarter' ? null : 'quarter')}
           onClose={() => setOpenDropdown(null)}
@@ -110,7 +110,7 @@ export default function FilterBar({ onFiltersChange, filters }) {
           value={filters.category}
           options={categoryOptions}
           onSelect={(value) => handleChange('category', value)}
-          widthClass='w-40'
+          widthClass='w-48'
           isOpen={openDropdown === 'category'}
           onToggle={() => setOpenDropdown(openDropdown === 'category' ? null : 'category')}
           onClose={() => setOpenDropdown(null)}
