@@ -5,6 +5,26 @@ import {
 } from '../utils/dataUtils';
 import { useFilters } from '../context/FiltersContext';
 
+const MONTH_MAP = {
+  Jan: 0,
+  Feb: 1,
+  Mar: 2,
+  Apr: 3,
+  May: 4,
+  Jun: 5,
+  Jul: 6,
+  Aug: 7,
+  Sep: 8,
+  Oct: 9,
+  Nov: 10,
+  Dec: 11,
+};
+
+const parseDDMonYYYY = (dateStr) => {
+  const [day, mon, year] = dateStr.split('-');
+  return new Date(parseInt(year, 10), MONTH_MAP[mon], parseInt(day, 10)).getTime();
+};
+
 export default function MembersList({ members, expandedMemberId, onExpandMember }) {
   const { filters } = useFilters();
   return (
@@ -73,7 +93,9 @@ export default function MembersList({ members, expandedMemberId, onExpandMember 
             </div>
           </button>
 
-          {expandedMemberId === member.id && <MemberDetail memberId={member.id} filters={filters} />}
+          {expandedMemberId === member.id && (
+            <MemberDetail memberId={member.id} filters={filters} />
+          )}
         </div>
       ))}
     </div>
@@ -181,12 +203,7 @@ const CATEGORY_ICON_MAP = [
     match: 'feature',
     icon: (
       <svg className='h-6 w-6' viewBox='0 0 24 24' fill='none' stroke='currentColor'>
-        <path
-          strokeLinecap='round'
-          strokeLinejoin='round'
-          strokeWidth='1.8'
-          d='M12 3v18M3 12h18'
-        />
+        <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='1.8' d='M12 3v18M3 12h18' />
         <rect x='5' y='5' width='14' height='14' rx='2' strokeWidth='1.8' />
       </svg>
     ),
@@ -292,7 +309,7 @@ function MemberDetail({ memberId, filters }) {
 
           {/* Table Body */}
           {memberActivities
-            .sort((a, b) => new Date(b.date) - new Date(a.date))
+            .sort((a, b) => parseDDMonYYYY(b.date) - parseDDMonYYYY(a.date))
             .map((activity) => (
               <div
                 key={activity.id}

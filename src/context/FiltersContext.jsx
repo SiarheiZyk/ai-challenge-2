@@ -1,16 +1,10 @@
 import { createContext, useContext, useMemo, useState } from 'react';
-
-const defaultFilters = {
-  year: 'All Years',
-  quarter: 'All Quarters',
-  category: 'All Categories',
-  searchTerm: '',
-};
+import { DEFAULT_FILTERS } from '../utils/constants';
 
 const FiltersContext = createContext(null);
 
 export function FiltersProvider({ children }) {
-  const [filters, setFilters] = useState(defaultFilters);
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
 
   const value = useMemo(() => ({ filters, setFilters }), [filters]);
 

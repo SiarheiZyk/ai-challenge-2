@@ -1,13 +1,7 @@
 import { employees, activities, CATEGORY_POINTS } from '../data/mockData';
+import { DEFAULT_FILTERS } from './constants';
 
-const defaultFilters = {
-  year: 'All Years',
-  quarter: 'All Quarters',
-  category: 'All Categories',
-  searchTerm: '',
-};
-
-const normalizeFilters = (filters) => ({ ...defaultFilters, ...filters });
+const normalizeFilters = (filters) => ({ ...DEFAULT_FILTERS, ...filters });
 
 const matchesActivityFilters = (activity, filters) => {
   const yearMatch = filters.year === 'All Years' || activity.year === filters.year;
@@ -55,10 +49,12 @@ const filterEmployees = (filters) => {
   return filtered;
 };
 
-const sortByScore = (employeeList, filters) =>
-  [...employeeList].sort(
-    (a, b) => calculateMemberScore(b.id, filters) - calculateMemberScore(a.id, filters),
+const sortByScore = (employeeList, filters) => {
+  const scoreCache = new Map(
+    employeeList.map((emp) => [emp.id, calculateMemberScore(emp.id, filters)]),
   );
+  return [...employeeList].sort((a, b) => scoreCache.get(b.id) - scoreCache.get(a.id));
+};
 
 export const getTopThree = (employeeList, filters) =>
   sortByScore(employeeList, filters).slice(0, 3);
