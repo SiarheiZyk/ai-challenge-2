@@ -131,11 +131,13 @@ function generateActivitiesForMember(memberId, baseActivityId) {
     const daysAgo = Math.floor(Math.random() * 365) + 1;
     const date = new Date();
     date.setDate(date.getDate() - daysAgo);
-    const formattedDate = date.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    });
+    const formattedDate = date
+      .toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      })
+      .replace(/\s/g, '-');
 
     activitiesArray.push({
       id: activityId++,
