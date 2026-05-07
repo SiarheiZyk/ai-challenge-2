@@ -27,15 +27,17 @@ jobs:
           node-version: lts/*
 
       - name: Install dependencies
+        working-directory: task-1
         run: npm ci || npm install
 
       - name: Build
+        working-directory: task-1
         run: npm run build
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: task-1/dist
 
   deploy:
     needs: build
